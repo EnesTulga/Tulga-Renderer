@@ -10,7 +10,7 @@ from OpenGL.GLUT import *
 # -------------------------
 
 # Reading OBJ files
-dosya = open("centaur.obj", "r")	# Give the first parameter as obj file directory.
+dosya = open("ObjFiles/Centaur.obj", "r")	# Give the first parameter as obj file directory.
 model = dosya.read()
 # ------------------------------
 
