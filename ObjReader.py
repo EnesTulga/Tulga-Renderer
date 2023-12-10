@@ -10,19 +10,19 @@ from OpenGL.GLUT import *
 # -------------------------
 
 # Reading OBJ files
-dosya = open("ObjFiles/Centaur.obj", "r")	# Give the first parameter as obj file directory.
-model = dosya.read()
+objFile = open("ObjFiles/Centaur.obj", "r")	# Give the first parameter as obj file directory.
+model = objFile.read()
 # ------------------------------
 
-noktalar = []   # Verticies
-yuzler = []	# Faces
+vertices = []   # Verticies
+faces = []	# Faces
 
-#  The Function that finds verticies in model variable (obj file) and assign to noktalar array
-def noktaBulucu():
+#  The Function that finds verticies in model variable (obj file) and assign to vertices array
+def FindVertices():
 	global model
-	global noktalar
+	global vertices
 	i = 0
-	gecici = ""
+	lineString = ""
 	flag = False
 	while(i < len(model)):
 		if(flag):
@@ -32,12 +32,12 @@ def noktaBulucu():
 				
 				while(model[i] != "\n"):
 					if(model[i] != " "):
-						gecici += model[i]
+						lineString += model[i]
 						i += 1
 						if(model[i] == " " or model[i] == "\n"):
 							
-							noktalar.append(float(gecici))
-							gecici = ""
+							vertices.append(float(lineString))
+							lineString = ""
 							
 					else:
 						i += 1
@@ -46,13 +46,13 @@ def noktaBulucu():
 			flag = True
 		i += 1
 
-#  The Function that finds faces in model variable (obj file) and assign to yuzler array
-def yuzBulucu():
+#  The Function that finds faces in model variable (obj file) and assign to faces array
+def FindFaces():
 	global model
-	global yuzler
+	global faces
 	i = 0
-	gecici = ""
-	geciciDizi = []
+	lineString = ""
+	vertexArrayInLine = []
 	flag = False
 	while(i < len(model)):
 		if(flag):
@@ -63,18 +63,18 @@ def yuzBulucu():
 				
 				while(model[i] != "\n"):
 					if(model[i] != " "):
-						gecici += model[i]
+						lineString += model[i]
 						i += 1
 						
 						if(model[i] == "/"):
-							geciciDizi.append(int(gecici) - 1)
-							gecici = ""
+							vertexArrayInLine.append(int(lineString) - 1)
+							lineString = ""
 							while(model[i] != " " and model[i] != "\n"):
 								i += 1
 						if(model[i] == "\n" or model[i + 1] == "\n"):
 							
-							yuzler.append(geciciDizi)
-							geciciDizi = []
+							faces.append(vertexArrayInLine)
+							vertexArrayInLine = []
 					else:
 						i += 1				
 		if(model[i] == "\n"):
@@ -82,31 +82,31 @@ def yuzBulucu():
 		i += 1
 
 
-# This function drawing 3D model in yuzler and noktalar arrays in angle depends on a and b parameter.
+# This function drawing 3D model in faces and vertices arrays in angle depends on a and b parameter.
 #	a = {0 : X, 1: Y, 2: Z}
 #	b = {0 : X, 1: Y, 2: Z}
 #    Also, x and y parameter defines that where is the starting of the frame. 
-def vektorelCizdir(a,b, x, y):
-	for yuz in yuzler:
+def DrawMesh(a,b, x, y):
+	for face in faces:
 		glBegin(GL_POLYGON)
-		for nokta in yuz:
-			glVertex2f(noktalar[nokta*3 + a] + x, noktalar[nokta*3 + b] + y)
+		for vertex in face:
+			glVertex2f(vertices[vertex*3 + a] + x, vertices[vertex*3 + b] + y)
 		glEnd()
-noktaBulucu()
-yuzBulucu()
+FindVertices()
+FindFaces()
 
-# JUST MODEL SCALING
+# SCALING MODEL
 
-sag = noktalar[0]
-sol = noktalar[0]
-for i in noktalar[::3]:
-	if(sag < i):
-		sag = i
-	elif(sol > i):
-		sol = i
-buyukluk = 200/(sag - sol)
-for i in range(0,len(noktalar)):
-	noktalar[i] = noktalar[i] * buyukluk
+mostRightVertex = vertices[0]
+mostLeftVertex = vertices[0]
+for i in vertices[::3]:
+	if(mostRightVertex < i):
+		mostRightVertex = i
+	elif(mostLeftVertex > i):
+		mostLeftVertex = i
+scaleRatio = 200/(mostRightVertex - mostLeftVertex)
+for i in range(0,len(vertices)):
+	vertices[i] = vertices[i] * scaleRatio
 
 # --------------------------------------------
 
@@ -121,10 +121,10 @@ def plotpoints():
 
 	# Drawing the model from different angles
 	
-	vektorelCizdir(0,2,-256, 240)
-	vektorelCizdir(0,1, 256, 160)
-	vektorelCizdir(2,1, -256, -240)
-	vektorelCizdir(2, 0, 256, -240)
+	DrawMesh(0,2,-256, 240)
+	DrawMesh(0,1, 256, 160)
+	DrawMesh(2,1, -256, -240)
+	DrawMesh(2, 0, 256, -240)
 	
 	# ---------------------------------------
 
@@ -140,4 +140,4 @@ init()
 glutMainLoop()
 
 
-dosya.close()
+objFile.close()
